@@ -1,21 +1,20 @@
+import os
 import anthropic
 import streamlit as st
 
 st.set_page_config(
     page_title="Mohan Bot",
-    page_icon="@@",
+    page_icon="🤖",            # ← fixed
     layout="centered"
 )
-
 
 # ── Sidebar — Customize Your Bot ────────────────────────
 st.sidebar.title("⚙️ Customize Your Bot")
 
 bot_name = st.sidebar.text_input(
-    "Bot Name", 
-    value="Buddy"
+    "Bot Name",
+    value="Mohan"
 )
-
 
 bot_role = st.sidebar.selectbox(
     "Bot Personality",
@@ -28,7 +27,6 @@ bot_role = st.sidebar.selectbox(
         "Custom (type below)"
     ]
 )
-
 
 custom_role = st.sidebar.text_area(
     "Custom Personality (optional)",
@@ -44,14 +42,12 @@ temperature = st.sidebar.slider(
     help="0 = factual & precise  |  1 = creative & random"
 )
 
-
 # Clear chat button
 if st.sidebar.button("🗑️ Clear Chat"):
     st.session_state.messages = []
     st.rerun()
 
-
-# ── Build System Prompt ──────────────────────────────────
+# ── Build System Prompt ───────────────────────────────────
 role_prompts = {
     "Friendly Personal Assistant":
         f"You are {bot_name}, a friendly helpful assistant. Keep answers short and simple.",
@@ -69,23 +65,21 @@ role_prompts = {
 
 system_prompt = role_prompts[bot_role]
 
-# ── Main Chat Area ───────────────────────────────────────
+# ── Main Chat Area ────────────────────────────────────────
 st.title(f"🤖 {bot_name}")
 st.caption(f"Personality: {bot_role}")
 st.divider()
 
-# ── Initialize Chat History ──────────────────────────────
-# st.session_state keeps data alive across reruns
+# ── Initialize Chat History ───────────────────────────────
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# ── Display All Previous Messages ────────────────────────
+# ── Display All Previous Messages ─────────────────────────
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-
-# ── Chat Input Box ───────────────────────────────────────
+# ── Chat Input Box ────────────────────────────────────────
 user_input = st.chat_input(f"Message {bot_name}...")
 
 if user_input:
@@ -100,9 +94,9 @@ if user_input:
         "content": user_input
     })
 
-    # ── Call Claude API ──────────────────────────────────
+    # ── Call Claude API ───────────────────────────────────
     client = anthropic.Anthropic(
-        api_key=st.secrets["ANTHROPIC_API_KEY"]
+        api_key=os.environ.get("ANTHROPIC_API_KEY")  # ← fixed
     )
 
     with st.chat_message("assistant"):
@@ -121,4 +115,3 @@ if user_input:
         "role": "assistant",
         "content": ai_reply
     })
-
